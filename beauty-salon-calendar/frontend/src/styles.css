@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.fc { --fc-border-color: rgba(148, 163, 184, 0.2); }
+.fc .fc-toolbar-title { font-size: 1.05rem; }
+.fc .fc-button { border-radius: 0.75rem; }

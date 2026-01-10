@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  api:
+    build: ./backend
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - JWT_SECRET=change_me_in_production
+      - DB_PATH=/data/app.db
+      - CORS_ORIGIN=http://localhost
+    volumes:
+      - salon_data:/data
+    ports:
+      - "4000:4000"
+
+  web:
+    build: ./frontend
+    environment:
+      - VITE_API_URL=/api
+      - VITE_SOCKET_URL=
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+
+volumes:
+  salon_data:
