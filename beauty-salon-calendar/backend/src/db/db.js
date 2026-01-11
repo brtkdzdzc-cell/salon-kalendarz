@@ -1,11 +1,45 @@
-import Database from "better-sqlite3";
+import pg from "pg";
 import { env } from "../utils/env.js";
-import fs from "fs";
-import path from "path";
 
-const dbDir = path.dirname(env.DB_PATH);
-if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+const { Pool } = pg;
 
-export const db = new Database(env.DB_PATH);
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
+if (!env.DATABASE_URL) {
+  throw new Error("Brak env.DATABASE_URL — w Render ustaw DATABASE_URL z Supabase");
+}
+
+export const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }, // Supabase wymaga SSL
+});
+
+// Prosty konwerter: zamienia ? na $1, $2...
+function qmarkToDollar(sql) {
+  let i = 0;
+  return sql.replace(/\?/g, () => `$${++i}`);
+}
+
+// API podobne do better-sqlite3: db.prepare(sql).all/get/run
+export const db = {
+  prepare(sql) {
+    const text = qmarkToDollar(sql);
+
+    return {
+      async all(...params) {
+        const r = await pool.query(text, params);
+        return r.rows;
+      },
+
+      async get(...params) {
+        const r = await pool.query(text, params);
+        return r.rows[0] ?? null;
+      },
+
+      async run(...params) {
+        const r = await pool.query(text, params);
+        // kompatybilność z kodem: udajemy lastInsertRowid jeśli jest RETURNING id
+        const id = r.rows?.[0]?.id ?? null;
+        return { lastInsertRowid: id, changes: r.rowCount };
+      },
+    };
+  },
+};
