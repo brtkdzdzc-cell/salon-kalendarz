@@ -14,7 +14,7 @@ r.get("/", (req, res) => {
   if (q) {
     rows = db.prepare(`
       SELECT * FROM clients
-      WHERE full_name LIKE ? OR phone LIKE ? OR email LIKE ?
+      WHERE full_name LIKE ? OR phone LIKE ?
       ORDER BY full_name ASC
       LIMIT 100
     `).all(`%${q}%`, `%${q}%`, `%${q}%`);
@@ -28,13 +28,15 @@ r.post("/", (req, res) => {
   const schema = z.object({
     full_name: z.string().min(1),
     phone: z.string().optional(),
-    email: z.string().email().optional(),
+    
     notes: z.string().optional(),
   });
   const data = schema.parse(req.body);
 
-  const info = db.prepare("INSERT INTO clients (full_name, phone, email, notes) VALUES (?,?,?,?)")
-    .run(data.full_name, data.phone || null, data.email || null, data.notes || null);
+  const info = db.prepare("INSERT INTO clients (full_name, phone, notes)
+ VALUES (?,?,?,?)")
+    .run(data.full_name, data.phone || null, data.notes || null);
+
   res.json({ id: info.lastInsertRowid });
 });
 
@@ -51,7 +53,8 @@ r.patch("/:id", (req, res) => {
   const current = db.prepare("SELECT * FROM clients WHERE id = ?").get(id);
   if (!current) return res.status(404).json({ error: "Nie znaleziono klientki" });
 
-  db.prepare("UPDATE clients SET full_name=?, phone=?, email=?, notes=? WHERE id=?").run(
+  db.prepare("UPDATE clients SET full_name=?, phone=?, notes=? WHERE id=?
+").run(
     data.full_name ?? current.full_name,
     data.phone ?? current.phone,
     data.email ?? current.email,
