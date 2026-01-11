@@ -9,7 +9,8 @@ export default function Clients({ onRepeat }) {
   const [clients, setClients] = useState([]);
   const [open, setOpen] = useState(false);
   const [clientModal, setClientModal] = useState({ open: false, client: null, history: [] });
-  const [form, setForm] = useState({ full_name: "", phone: "", email: "", notes: "" });
+  const [form, setForm] = useState({ full_name: "", phone: "", notes: "" });
+
 
   async function load() {
     const { data } = await api.get("/clients", { params: q ? { q } : {} });
@@ -20,7 +21,8 @@ export default function Clients({ onRepeat }) {
   async function create() {
     await api.post("/clients", form);
     setOpen(false);
-    setForm({ full_name: "", phone: "", email: "", notes: "" });
+    setForm({ full_name: "", phone: "", notes: "" });
+
     await load();
   }
 
@@ -75,7 +77,7 @@ export default function Clients({ onRepeat }) {
         <div className="space-y-3">
           <div><div className="text-xs text-slate-300 mb-1">Imię i nazwisko</div><Input value={form.full_name} onChange={(e)=>setForm(f=>({ ...f, full_name: e.target.value }))} /></div>
           <div><div className="text-xs text-slate-300 mb-1">Telefon</div><Input value={form.phone} onChange={(e)=>setForm(f=>({ ...f, phone: e.target.value }))} /></div>
-          <div><div className="text-xs text-slate-300 mb-1">Email</div><Input value={form.email} onChange={(e)=>setForm(f=>({ ...f, email: e.target.value }))} /></div>
+          
           <div><div className="text-xs text-slate-300 mb-1">Uwagi (o klientce)</div><Input value={form.notes} onChange={(e)=>setForm(f=>({ ...f, notes: e.target.value }))} /></div>
         </div>
       </Modal>
