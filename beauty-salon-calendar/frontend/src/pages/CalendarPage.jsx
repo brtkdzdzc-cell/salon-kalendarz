@@ -236,12 +236,53 @@ export default function CalendarPage({ repeatDraft, onConsumedRepeat }) {
         title={editId ? "Edytuj wizytę" : "Nowa wizyta"}
         onClose={()=>setOpen(false)}
         footer={
-          <div className="flex gap-2">
-            {editId ? <Button variant="danger" className="flex-1" onClick={remove}>Usuń</Button> : null}
-            <Button variant="ghost" className="flex-1" onClick={()=>setOpen(false)}>Anuluj</Button>
-            <Button className="flex-1" onClick={save}>Zapisz</Button>
-          </div>
-        }
+  <div className="flex gap-2">
+    {editId? (
+      <Button variant="danger" className="flex-1" onClick={remove}>
+        Usuń
+      </Button>
+    ): null}
+
+    <Button
+      variant="ghost"
+      className="flex-1"
+      onClick={() => setOpen(false)}
+    >
+      Anuluj
+    </Button>
+
+    {/* ✅ NOWY PRZYCISK */}
+    <Button
+      variant="ghost"
+      className="flex-1"
+      onClick={() => {
+        // bierzemy godzinę z aktualnego formularza
+        const start = new Date(form.start_at);
+        const end = new Date(start.getTime() + 60 * 60 * 1000);
+
+        setErr("");
+        setEditId(null);
+        setOpen(true);
+
+        setForm((f) => ({
+          ...f,
+          client_id: null, // żeby od razu wybrać kolejną klientkę
+          start_at: toLocalInputValue(start.toISOString()),
+          end_at: toLocalInputValue(end.toISOString()),
+          service_name: f.service_name || "",
+          notes: f.notes || "",
+        }));
+      }}
+    >
+      + Kolejna o tej godzinie
+    </Button>
+
+    <Button className="flex-1" onClick={save}>
+      Zapisz
+    </Button>
+  </div>
+}
+
       >
         <div className="space-y-3">
           <div>
