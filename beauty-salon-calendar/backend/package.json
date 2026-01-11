@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "db:init": "node src/db/init.js"
+    "db:init": "node src/db/init_pg.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
