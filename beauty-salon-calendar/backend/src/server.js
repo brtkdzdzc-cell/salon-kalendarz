@@ -53,8 +53,14 @@ io.on("connection", (socket) => {
   socket.emit("hello", { ok: true });
 });
 
-server.listen(env.PORT, () => {
+server.listen(env.PORT, async () => {
   console.log(`API listening on http://localhost:${env.PORT}`);
-  // ping db
-  db.prepare("SELECT 1").get();
+
+  // ping db (Postgres)
+  try {
+    await db.prepare("SELECT 1").get();
+    console.log("✅ DB ping ok");
+  } catch (e) {
+    console.error("❌ DB ping failed", e);
+  }
 });
