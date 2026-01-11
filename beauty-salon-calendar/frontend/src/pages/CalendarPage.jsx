@@ -93,7 +93,7 @@ export default function CalendarPage({ repeatDraft, onConsumedRepeat }) {
     setErr("");
     setEditId(null);
     setOpen(true);
-
+    
     const start = info.start;
     const end = info.end || new Date(info.start.getTime() + 60*60*1000);
 
@@ -176,27 +176,59 @@ export default function CalendarPage({ repeatDraft, onConsumedRepeat }) {
 
       <div className="mt-3 bg-white/5 border border-white/10 rounded-3xl p-2">
         <FullCalendar
-          ref={calRef}
-          plugins={[timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          height="auto"
-          selectable={true}
-          selectMirror={true}
-          nowIndicator={true}
-          firstDay={1}
-          locale="pl"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "timeGridDay,timeGridWeek,dayGridMonth,listWeek",
-          }}
-          slotMinTime="07:00:00"
-          slotMaxTime="21:00:00"
-          select={onSelect}
-          eventClick={onEventClick}
-          events={events}
-          datesSet={(arg) => loadAppointments(arg.start.toISOString(), arg.end.toISOString())}
-        />
+  ref={calRef}
+  plugins={[timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin]}
+  initialView="timeGridWeek"
+  height="auto"
+  selectable={true}
+  selectMirror={true}
+  nowIndicator={true}
+  firstDay={1}
+  locale="pl"
+  headerToolbar={{
+    left: "prev,next today",
+    center: "title",
+    right: "timeGridDay,timeGridWeek,dayGridMonth,listWeek",
+  }}
+  slotMinTime="07:00:00"
+  slotMaxTime="21:00:00"
+
+  /* ✅ WIELE OSÓB W TEJ SAMEJ GODZINIE (widoczne osobno) */
+  eventOverlap={true}
+  slotEventOverlap={true}
+  eventMaxStack={50}
+  expandRows={true}
+
+  /* ✅ Tapnięcie w kratkę godziny zawsze dodaje wizytę (mega ważne na telefonie) */
+  dateClick={(info) => onSelect({ start: info.date, end: new Date(info.date.getTime() + 60 * 60 * 1000) })}
+
+  select={onSelect}
+
+  /* ✅ Klik w istniejącą wizytę: oprócz edycji zapamiętaj godzinę, żeby dodać kolejną */
+  eventClick={(info) => {
+    onEventClick(info);
+    window.__lastSlotStart = info.event.start;
+  }}
+
+  events={events}
+  datesSet={(arg) => loadAppointments(arg.start.toISOString(), arg.end.toISOString())}
+
+  /* ✅ Czytelny kafelek = "wizualnie widać każdą osobę" */
+  eventContent={(arg) => (
+    <div style={{ padding: "4px 6px", lineHeight: 1.15 }}>
+      <div style={{ fontWeight: 800, fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {arg.event.title}
+      </div>
+      {arg.event.extendedProps?.service_name ? (
+        <div style={{ fontSize: 11, opacity: 0.9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {arg.event.extendedProps.service_name}
+        </div>
+      ) : null}
+    </div>
+  )}
+/>
+
+
       </div>
 
       <Modal
