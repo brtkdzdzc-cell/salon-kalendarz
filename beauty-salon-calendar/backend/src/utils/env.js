@@ -1,14 +1,17 @@
-import process from "process";
+import { z } from "zod";
 
-function required(name, fallback) {
-  const v = process.env[name] ?? fallback;
-  if (v === undefined || v === null || v === "") throw new Error(`Missing env: ${name}`);
-  return v;
-}
+const schema = z.object({
+  // Render/Node
+  PORT: z.coerce.number().default(4000),
 
-export const env = {
-  PORT: Number(process.env.PORT || 4000),
-  DB_PATH: required("DB_PATH", "./data/app.db"),
-  JWT_SECRET: required("JWT_SECRET", "change_me"),
-  CORS_ORIGIN: required("CORS_ORIGIN", "http://localhost:5173"),
-};
+  // Auth
+  JWT_SECRET: z.string().min(1),
+
+  // Frontend origin (np. https://twoj-frontend.onrender.com albo https://salontarnobrzeg.pl)
+  CORS_ORIGIN: z.string().min(1),
+
+  // Supabase Postgres
+  DATABASE_URL: z.string().min(1),
+});
+
+export const env = schema.parse(process.env);
